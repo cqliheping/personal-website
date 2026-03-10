@@ -30,6 +30,9 @@ Thumbs.db
 *.bak
 *.backup
 
+# Form submission data (contains user info)
+messages.json
+
 # Lock files (optional)
 # package-lock.json
 # yarn.lock

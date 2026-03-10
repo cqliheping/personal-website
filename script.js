@@ -159,48 +159,67 @@ function initSkillBars() {
 function initContactForm() {
     const form = document.getElementById('contactForm');
     const formSuccess = document.getElementById('formSuccess');
-    
-    form.addEventListener('submit', (e) => {
+
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         if (validateForm()) {
             const submitBtn = form.querySelector('.btn-submit');
             const originalText = submitBtn.innerHTML;
-            
+
             submitBtn.innerHTML = '<span>发送中...</span>';
             submitBtn.disabled = true;
-            
-            setTimeout(() => {
-                form.reset();
+
+            // 使用 FormData 获取表单数据
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: form.method,
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    form.reset();
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+
+                    formSuccess.classList.add('show');
+
+                    setTimeout(() => {
+                        formSuccess.classList.remove('show');
+                    }, 3000);
+                } else {
+                    throw new Error(result.message || '发送失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`发送失败: ${error.message}`);
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
-                
-                formSuccess.classList.add('show');
-                
-                setTimeout(() => {
-                    formSuccess.classList.remove('show');
-                }, 3000);
-            }, 1500);
+            }
         }
     });
-    
+
     function validateForm() {
         const name = document.getElementById('name').value.trim();
         const email = document.getElementById('email').value.trim();
         const subject = document.getElementById('subject').value.trim();
         const message = document.getElementById('message').value.trim();
-        
+
         if (!name || !email || !subject || !message) {
             alert('请填写所有必填字段');
             return false;
         }
-        
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             alert('请输入有效的邮箱地址');
             return false;
         }
-        
+
         return true;
     }
 }
